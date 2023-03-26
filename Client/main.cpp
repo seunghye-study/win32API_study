@@ -67,7 +67,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
         else {
-
             CCore::GetInst()->progress();
         }
     }

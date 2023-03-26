@@ -1,10 +1,9 @@
 #pragma once
 class CObject
 {
-public:
-	POINT	m_ptPos;
-	POINT	m_ptScale;
-
+private:
+	Vec2 m_vPos;
+	Vec2 m_vScale;
 public:
 	CObject();
 	~CObject();
