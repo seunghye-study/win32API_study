@@ -4,6 +4,7 @@
 #include "CObject.h"
 #include "CTimeMgr.h"
 #include "CkeyMgr.h"
+#include "CSceneMgr.h"
 
 CObject g_obj;
 
@@ -33,10 +34,11 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 	HBITMAP hOldBit = (HBITMAP)SelectObject(m_memDC, m_hBit);
 	DeleteObject(hOldBit);
 
+
+	// 초기화
 	CTimeMgr::GetInst()->init();
 	CkeyMgr::GetInst()->init();
-	g_obj.SetPos(Vec2((float)(m_ptResolution.x / 2), (float)(m_ptResolution.y / 2)));
-	g_obj.SetScale(Vec2(100, 100));
+	CSceneMgr::GetInst()->init();
 
 	return S_OK;
 }
@@ -44,31 +46,11 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 void CCore::progress()
 {
 	CTimeMgr::GetInst()->Update();
-	update();
-	render();
-}
-
-void CCore::update()
-{
-	Vec2 vPos = g_obj.GetPos();
-	if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
-		vPos.x -= 100.f * fDT;
-	}
-	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
-		vPos.x += 100.f * fDT;
-	}
-	g_obj.SetPos(vPos);
-}
-
-void CCore::render()
-{
-	Rectangle(m_memDC, -1, -1, m_ptResolution.x+1, m_ptResolution.y+1);
-
-	Vec2 vPos = g_obj.GetPos();
-	Vec2 vScale = g_obj.GetScale();
-	Rectangle(m_memDC, int(vPos.x - vScale.x/2.f),
-		int(vPos.y - vScale.y / 2.f),
-		int(vPos.x + vScale.x / 2.f),
-		int(vPos.y + vScale.y / 2.f));
+	CkeyMgr::GetInst()->Update();
+	CSceneMgr::GetInst()->Update();
+	// == render ==
+	// == clear ==
+	Rectangle(m_memDC, -1, -1, m_ptResolution.x + 1, m_ptResolution.y + 1);
+	CSceneMgr::GetInst()->Render(m_memDC); // 인자 : 목적 dc
 	BitBlt(m_hDC, 0, 0, m_ptResolution.x, m_ptResolution.y, m_memDC, 0, 0, SRCCOPY);
 }
