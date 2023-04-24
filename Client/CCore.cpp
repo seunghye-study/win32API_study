@@ -4,6 +4,7 @@
 #include "CObject.h"
 #include "CTimeMgr.h"
 #include "CkeyMgr.h"
+#include "CSceneMgr.h"
 
 CObject g_obj;
 
@@ -33,10 +34,11 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 	HBITMAP hOldBit = (HBITMAP)SelectObject(m_memDC, m_hBit);
 	DeleteObject(hOldBit);
 
+
+	// 초기화
 	CTimeMgr::GetInst()->init();
 	CkeyMgr::GetInst()->init();
-	g_obj.SetPos(Vec2((float)(m_ptResolution.x / 2), (float)(m_ptResolution.y / 2)));
-	g_obj.SetScale(Vec2(100, 100));
+	CSceneMgr::GetInst()->init();
 
 	return S_OK;
 }
@@ -44,33 +46,22 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 void CCore::progress()
 {
 	CTimeMgr::GetInst()->Update();
-	CkeyMgr::GetInst()->Update();
 	update();
 	render();
 }
 
 void CCore::update()
 {
-	// 키매니저
-	// 어떤 역할 ?? : 프레임 동기화 
-	// 업데이트 돌때 특정 키가 지금 이순간에 눌렸냐 안눌렀냐 로 확인
-	// 단점 : if문까지 가야 left, right가 어떤 상태인지 알 수 있음
-	// 우리 프로그램은 매 순간 업데이트를 거치고 업데이트가 끝나면 화면에 렌더링
-	// == 1 프레임의 과정 --> 1프레임 시간 = dt
-	// dt라는 시간이 흐르는 과정 중에서 모든 물체는 동시에 이벤트 발생
-	// 그러나 프로그램의 특성상 내부적으로는 1개씩 이벤트가 발생 (각각 발생)
-	// 만약 left가 눌리는 분기가 두개가 있을 때 1번 left는 left가 눌린 상태, 하지만 2번 left는 안눌린 상태일 수 있음
-	// 일괄적으로 키보드의 ㅅ상태를 fix 해놓고(키매니저를 통해) 이벤트를 fix한 상태를 이용해 반영
-	// 
 	Vec2 vPos = g_obj.GetPos();
-	if (CkeyMgr::GetInst()->GetKeyState(KEY::LEFT) == KEY_STATE::HOLD) {
-		vPos.x -= 200.f * fDT;
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
+		vPos.x -= 100.f * fDT;
 	}
-	if (CkeyMgr::GetInst()->GetKeyState(KEY::RIGHT) == KEY_STATE::HOLD) {
-		vPos.x += 200.f * fDT;
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
+		vPos.x += 100.f * fDT;
 	}
 	g_obj.SetPos(vPos);
 }
+
 void CCore::render()
 {
 	Rectangle(m_memDC, -1, -1, m_ptResolution.x+1, m_ptResolution.y+1);
